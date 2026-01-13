@@ -63,8 +63,66 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return streaming response
-    return new NextResponse(response.body, {
+    // Create a custom readable stream that parses the SSE format
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('No response body');
+    }
+
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    const customReadable = new ReadableStream({
+      async start(controller) {
+        try {
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            
+            // Keep the last incomplete line in the buffer
+            buffer = lines[lines.length - 1];
+
+            for (let i = 0; i < lines.length - 1; i++) {
+              const line = lines[i].trim();
+              
+              if (line === '') continue;
+              if (line === 'data: [DONE]') {
+                controller.close();
+                return;
+              }
+
+              if (line.startsWith('data: ')) {
+                try {
+                  const jsonStr = line.slice(6);
+                  const json = JSON.parse(jsonStr);
+                  
+                  if (json.choices && json.choices[0] && json.choices[0].delta) {
+                    const content = json.choices[0].delta.content;
+                    if (content) {
+                      controller.enqueue(encoder.encode(content));
+                    }
+                  }
+                } catch (e) {
+                  // Skip malformed JSON
+                  console.error('Failed to parse JSON:', e);
+                }
+              }
+            }
+          }
+
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+
+    return new NextResponse(customReadable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
