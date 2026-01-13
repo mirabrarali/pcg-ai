@@ -9,13 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "hsl(0 0% 3.6%)",
-        foreground: "hsl(0 0% 98%)",
-        muted: "hsl(0 0% 14.9%)",
-        "muted-foreground": "hsl(0 0% 63.9%)",
-        primary: "hsl(48 96.1% 40.8%)",
-        "primary-foreground": "hsl(0 0% 9%)",
-        border: "hsl(0 0% 14.9%)",
+        background: "rgb(9 9 11)", // zinc-950
+        foreground: "rgb(255 255 255)", // white
+        muted: "rgb(39 39 42)", // zinc-800
+        "muted-foreground": "rgb(161 161 170)", // zinc-400
+        primary: "rgb(251 191 36)", // amber-400
+        "primary-foreground": "rgb(24 24 27)", // zinc-900
+        border: "rgb(39 39 42)", // zinc-800
       },
     },
   },
