@@ -157,7 +157,7 @@ export default function ChatInterface({ role, onBack }: ChatInterfaceProps) {
                   <div className="prose prose-invert max-w-none text-sm leading-relaxed break-words">
                     <ReactMarkdown
                       components={{
-                        code: ({ inline, children }) => {
+                        code: ({ node, inline, children, ...props }: any) => {
                           return !inline ? (
                             <div className="bg-black/50 p-3 rounded-md my-2 overflow-x-auto text-xs font-mono border border-white/10">
                               <code>{children}</code>
